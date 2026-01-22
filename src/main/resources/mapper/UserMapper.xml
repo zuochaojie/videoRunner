@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.test.mapper.UserMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.example.test.model.UserModel" id="userMap">
+        <id column="id" property="id"/>
+        <result property="loginName" column="login_name" jdbcType="VARCHAR"/>
+        <result property="mail" column="mail" jdbcType="VARCHAR"/>
+        <result property="pass" column="pass" jdbcType="VARCHAR"/>
+        <result property="delete" column="delete" jdbcType="BIT"/>
+        <result property="createDate" column="create_date" jdbcType="TIMESTAMP"/>
+        <result property="phone" column="phone" jdbcType="VARCHAR"/>
+        <result property="roleIds" column="role_ids" jdbcType="ARRAY"
+                typeHandler="com.example.test.type.ArrayTypeHandler"/>
+    </resultMap>
+<!--    <cache type="com.example.test.config.MybatisRedisCache"></cache>-->
+<!--    <sql id="columns">-->
+<!--        id,-->
+<!--        login_name,-->
+<!--        mail,-->
+<!--        pass,-->
+<!--        delete,-->
+<!--        create_date,-->
+<!--        phone,-->
+<!--        role_ids-->
+<!--    </sql>-->
+<!--    <sql id="values">-->
+<!--        #{id}::uuid,-->
+<!--        #{loginName ,jdbcType=VARCHAR},-->
+<!--        #{mail ,jdbcType=VARCHAR},-->
+<!--        #{pass ,jdbcType=VARCHAR},-->
+<!--        #{delete ,jdbcType=BIT},-->
+<!--        #{createDate ,jdbcType=TIMESTAMP},-->
+<!--        #{phone ,jdbcType=VARCHAR},-->
+<!--        #{roleIds ,typeHandler=com.example.test.type.ArrayTypeHandler}-->
+<!--    </sql>-->
+<!--    <insert id="insert" parameterType="com.example.test.model.UserModel" useGeneratedKeys="true" keyProperty="id">-->
+<!--        insert into tbl_user (<include refid="columns"/>)VALUES(<include refid="values"/>)-->
+<!--        &lt;!&ndash;ON CONFLICT (username) WHERE NOT delete  DO NOTHING  唯一约束和罗辑删除时&ndash;&gt;-->
+<!--    </insert>-->
+<!--    <insert id="insertBatch" parameterType="java.util.Collection">-->
+<!--        insert into tbl_user (<include refid="columns"/>) VALUES-->
+<!--        <foreach collection="list" item="it" separator=",">-->
+<!--            (<include refid="values"/>)-->
+<!--        </foreach>-->
+<!--    </insert>-->
+<!--    <delete id="deleteByPrimaryKey" parameterType="java.io.Serializable">-->
+<!--        delete from tbl_user where id=#{id}::uuid  &lt;!&ndash;	id为String时jdbcType=VARCHAR&ndash;&gt;-->
+<!--    </delete>-->
+<!--    <delete id="deleteByPrimaryKeys" parameterType="java.util.Collection">-->
+<!--        delete from tbl_user where id in-->
+<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
+<!--            #{id,typeHandler=com.example.test.type.UUIDTypeHandler}-->
+<!--        </foreach>-->
+<!--        &lt;!&ndash;	id为String时jdbcType=VARCHAR&ndash;&gt;-->
+<!--    </delete>-->
+
+<!--    <update id="updateByPrimaryKey" parameterType="com.example.test.model.UserModel">-->
+<!--        update tbl_user-->
+<!--        <set>-->
+<!--            <if test="loginName != null">-->
+<!--                login_name=#{loginName ,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="mail != null">-->
+<!--                mail=#{mail ,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="pass != null">-->
+<!--                pass=#{pass ,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="delete != null">-->
+<!--                delete=#{delete ,jdbcType=BIT},-->
+<!--            </if>-->
+<!--            <if test="createDate != null">-->
+<!--                create_date=#{createDate ,jdbcType=TIMESTAMP},-->
+<!--            </if>-->
+<!--            <if test="phone != null">-->
+<!--                phone=#{phone ,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="roleIds != null">-->
+<!--                role_ids=#{roleIds ,typeHandler=com.example.test.type.ArrayTypeHandler},-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        WHERE id = #{id}::uuid-->
+<!--    </update>-->
+
+<!--    <select id="selectByPrimaryKey" parameterType="java.util.UUID" resultMap="userMap">-->
+<!--        select * from tbl_user where id = #{id}::uuid-->
+<!--    </select>-->
+
+<!--    <select id="queryList" parameterType="com.example.test.model.UserModel" resultMap="userMap">-->
+<!--        select * from tbl_user-->
+<!--        <where>-->
+<!--            <if test="loginName != null">-->
+<!--                and login_name=#{loginName ,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--            <if test="mail != null">-->
+<!--                and mail=#{mail ,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--            <if test="pass != null">-->
+<!--                and pass=#{pass ,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--            <if test="delete != null">-->
+<!--                and delete=#{delete ,jdbcType=BIT}-->
+<!--            </if>-->
+<!--            <if test="createDate != null">-->
+<!--                and create_date=#{createDate ,jdbcType=TIMESTAMP}-->
+<!--            </if>-->
+<!--            <if test="phone != null">-->
+<!--                and phone=#{phone ,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--            <if test="roleIds != null">-->
+<!--                and role_ids=#{roleIds ,jdbcType=ARRAY}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        <if test="sortColumn != null">-->
+<!--            order by ${sortColumn}-->
+<!--        </if>-->
+<!--        <if test="sortType != null">-->
+<!--            ${sortType}-->
+<!--        </if>-->
+<!--    </select>-->
+</mapper>

@@ -1,0 +1,52 @@
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: my-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
+    compress-message-body-threshold: 4096
+  consumer:
+    group: my-consumer-group
+# 自定义配置
+rocketmq-config:
+  topic: test-topic
+  tag: test-tag
+  consumer-group: my-consumer-group
+  producer-group: my-producer-group
+spring:
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password: 123456
+  datasource:
+    url: jdbc:postgresql://localhost:5432/video
+#    url: jdbc:mysql://localhost:3306/ry?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: postgres
+    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      idle-timeout: 600000  #10 min
+      max-lifetime: 1800000 #30 min
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+server:
+  port: 9000
+jwt:
+  refresh-threshold: 300000
+  issuer: test
+  expires_in: 30
+#mybatis
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  type-handlers-package: com.example.test.type
+#  configuration:
+#    log-prefix: repository.
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#mybatis page helper
+pagehelper:
+  autoDialect: true
+  closeConn: true
+  reasonable: true

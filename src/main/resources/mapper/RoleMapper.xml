@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.test.mapper.RoleMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.example.test.model.RoleModel" id="roleMap">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+        <result property="createDate" column="create_date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+<!--    <sql id="columns">-->
+<!--        name,-->
+<!--        create_by,-->
+<!--        create_date-->
+<!--    </sql>-->
+<!--    <sql id="values">-->
+<!--        &lt;!&ndash;#{userUuid}::uuid&ndash;&gt;-->
+<!--        #{name ,jdbcType=VARCHAR},-->
+<!--        #{createBy ,jdbcType=VARCHAR},-->
+<!--        #{createDate ,jdbcType=TIMESTAMP}-->
+<!--    </sql>-->
+<!--    <insert id="insert" parameterType="com.example.test.model.RoleModel" useGeneratedKeys="true" keyProperty="id">-->
+<!--        insert into tbl_role (<include refid="columns"/>)VALUES(<include refid="values"/>)-->
+<!--        &lt;!&ndash;ON CONFLICT (username) WHERE NOT delete  DO NOTHING  唯一约束和罗辑删除时&ndash;&gt;-->
+<!--    </insert>-->
+<!--    <insert id="insertBatch" parameterType="java.util.Collection">-->
+<!--        insert into tbl_role (<include refid="columns"/>) VALUES-->
+<!--        <foreach collection="list" item="it" separator=",">-->
+<!--            (<include refid="values"/>)-->
+<!--        </foreach>-->
+<!--    </insert>-->
+<!--    <delete id="deleteByPrimaryKey" parameterType="java.io.Serializable">-->
+<!--        delete from tbl_role where id=#{id}::INTEGER  &lt;!&ndash;	id为String时jdbcType=VARCHAR&ndash;&gt;-->
+<!--    </delete>-->
+<!--    <delete id="deleteByPrimaryKeys" parameterType="java.util.Collection">-->
+<!--        delete from tbl_role where id in-->
+<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
+<!--            #{id}-->
+<!--        </foreach>-->
+<!--        &lt;!&ndash;	id为String时jdbcType=VARCHAR&ndash;&gt;-->
+<!--    </delete>-->
+
+<!--    <update id="updateByPrimaryKey" parameterType="com.example.test.model.RoleModel">-->
+<!--        update tbl_role-->
+<!--        <set>-->
+<!--            <if test="name != null">-->
+<!--                name=#{name ,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="createBy != null">-->
+<!--                create_by=#{createBy ,jdbcType=VARCHAR},-->
+<!--            </if>-->
+<!--            <if test="createDate != null">-->
+<!--                create_date=#{createDate ,jdbcType=TIMESTAMP}-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        WHERE id = #{id}::INTEGER-->
+<!--        &lt;!&ndash;	id为String时jdbcType=VARCHAR&ndash;&gt;-->
+<!--    </update>-->
+
+<!--    <select id="selectByPrimaryKey" parameterType="java.io.Serializable" resultMap="roleMap">-->
+<!--        select * from tbl_role where id = #{id}::INTEGER-->
+<!--    </select>-->
+
+<!--    <select id="queryList" parameterType="com.example.test.model.RoleModel" resultMap="roleMap">-->
+<!--        select * from tbl_role-->
+<!--        <where>-->
+<!--            <if test="name != null">-->
+<!--                and name=#{name ,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--            <if test="createBy != null">-->
+<!--                and create_by=#{createBy ,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--            <if test="createDate != null">-->
+<!--                and create_date=#{createDate ,jdbcType=TIMESTAMP}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        <if test="sortColumn != null">-->
+<!--            order by ${sortColumn}-->
+<!--        </if>-->
+<!--        <if test="sortType != null">-->
+<!--            ${sortType}-->
+<!--        </if>-->
+<!--    </select>-->
+</mapper>
