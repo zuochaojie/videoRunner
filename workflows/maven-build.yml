@@ -1,0 +1,40 @@
+name: Maven Build Validation
+
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+  push:
+    branches: [ main, master, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17' # 根据你的项目调整版本
+        distribution: 'temurin'
+    
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Build with Maven
+      run: mvn clean compile test-compile
+      # 或者使用完整构建：mvn clean verify
+    
+    #- name: Run Tests
+    #  run: mvn test
+    
+    # 可选：静态代码分析
+    #- name: Run Checkstyle
+    #  run: mvn checkstyle:check
+    # continue-on-error: true # 如果检查失败不阻止合并
+    
