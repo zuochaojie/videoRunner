@@ -3,21 +3,34 @@ package com.example.test.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.test.model.CompanyModel;
+import com.example.test.model.VideoModel;
+import com.example.test.service.VideoService;
 import com.example.test.utils.Util;
-import jakarta.annotation.PostConstruct;
+import com.example.test.utils.XLDownloadAPI;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
-import java.io.Serializable;
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Date;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.test.mapper.ImageMapper;
 import com.example.test.model.ImageModel;
@@ -27,9 +40,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("imageService")
 public class ImageServiceImpl extends ServiceImpl<ImageMapper, ImageModel> implements ImageService {
 
-    public static ThreadPoolExecutor executor = new ThreadPoolExecutor(4, 4,
+    public static ThreadPoolExecutor executor = new ThreadPoolExecutor(6, 6,
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>());
+    @Autowired
+    private VideoService videoService;
+
+    private int total;
+
+    private AtomicInteger completedTaskCount = new AtomicInteger();
 
     @Override
     @Transactional(rollbackFor = {Throwable.class})
@@ -82,26 +101,41 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, ImageModel> imple
         return params;
     }
 
-    private boolean downloadImgRunning = false;
     @Scheduled(cron = "0 0 0/1 * * ? ")
     @Override
     public void downloadImg() {
-        if (downloadImgRunning){
+        if (executor.getActiveCount() > 0) {
             return;
         }
-        String array[] = {"caribbeancom", "pacopacomama", "1pondo", "heyzo"};
-        downloadImgRunning = true;
-        for (String s : array) {
-            System.out.println(s+" 图片下载任务开始。。。");
-            QueryWrapper<ImageModel> wrapper = Wrappers.query(new ImageModel()).like("id", s);
-            List<ImageModel> list = list(wrapper);
-            for (ImageModel model : list) {
-                boolean b = Util.saveUrl2File(model.getId().replace("https:https:","https:"), model.getFilePath(), 1000);
+        List<ImageModel> list = list();
+        Set<String> set = new HashSet<>();
+        total = list.size();
+        completedTaskCount.set(0);
+        for (ImageModel model : list) {
+            executor.execute(() -> {
+                boolean b = Util.saveUrl2File(model.getId(), model.getFilePath(),1);
                 if (b || Util.isNotFount(model.getId())) {
+                    completedTaskCount.getAndIncrement();
                     removeById(model.getId());
+                }else {
+                    String substring = model.getId().substring(model.getId().lastIndexOf("/") + 1);
+                    if (!set.contains(substring)){
+                        set.add(substring);
+                        Util.addThunderTask(model.getId(),model.getFilePath());
+                    }
                 }
-            }
+            });
+
         }
-        downloadImgRunning = false;
+    }
+
+    @Override
+    public String getImageTaskProcess() {
+        if (total == 0) {
+            return "0%";
+        }
+        BigDecimal totalDecimal = new BigDecimal(total);
+        BigDecimal completeDecimal = new BigDecimal(completedTaskCount.get() * 100);
+        return completeDecimal.divide(totalDecimal, 1, RoundingMode.HALF_UP).toString() + "%";
     }
 }

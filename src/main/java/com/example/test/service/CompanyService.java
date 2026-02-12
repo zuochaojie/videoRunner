@@ -14,5 +14,8 @@ import java.util.Collection;
  */
 public interface CompanyService extends IService<CompanyModel> {
      Map<String,Object> queryPage(Map<String,Object> params);
+
+    void getNewMovie();
+    String getMovieTaskProcess();
 }
 

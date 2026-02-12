@@ -2,11 +2,9 @@ package com.example.test.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -15,50 +13,102 @@ import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.util.EntityUtils;
 
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Util {
     private static final Map<String, String> map = new HashMap<>();
     private static final int CONNECT_TIMEOUT = 10000;
     private static final int SOCKET_TIMEOUT = 15000;
-    private static final int CONNECTION_RESET_COUNT = 20;
-
+    private static final int CONNECTION_RESET_COUNT = 1000;
     private static final Map<String, Boolean> status = new ConcurrentHashMap<>();
+    private static List<String> list = new CopyOnWriteArrayList<>();
+    private static Thread thread = null;
+
+    public static void addThunderTask(String url, String savePath) {
+        String dir = "D:\\迅雷下载\\";
+        File[] files = new File(dir).listFiles();
+        String substring = url.substring(url.lastIndexOf("/") + 1);
+        for (File file : files) {
+            if (file.getName().equals(substring)) {
+                try {
+                    FileUtils.copyFile(file, new File(savePath));
+                    file.delete();
+                    return;
+                } catch (IOException e) {
+
+                }
+            }
+        }
+        String thunderPath = "C:\\Program Files (x86)\\Thunder Network\\Thunder\\Program\\Thunder.exe";
+        String[] command = {thunderPath, url, "/start", "/f:" + savePath, "/t:0"};
+        ProcessBuilder pb = new ProcessBuilder(command);
+        try {
+            pb.start();
+            File file = new File(dir + substring);
+            if (list.isEmpty()) {
+                thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (!list.isEmpty()) {
+                            try {
+                                Thread.sleep(1 * 1000);
+                            } catch (InterruptedException e) {
+
+                            }
+                            for (String s : list) {
+                                if (new File(s).exists()) {
+                                    list.remove(s);
+                                    try {
+                                        FileUtils.copyFile(file, new File(savePath));
+                                    } catch (IOException e) {
+                                        System.out.println(e.getMessage());
+                                    }
+                                    file.delete();
+                                }
+                            }
+                        }
+
+                    }
+                });
+            }
+            list.add(dir + substring);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
     public static boolean saveUrl2File(String urlStr, String fileName) {
-        return saveUrl2File(urlStr, fileName, 1);
+        return saveUrl2File(urlStr, fileName, CONNECTION_RESET_COUNT);
     }
 
     public static boolean saveUrl2File(String urlStr, String fileName, int count) {
         String substring = fileName.substring(0, fileName.lastIndexOf("\\"));
         File dir = new File(substring);
+        File file = new File(fileName);
         dir.mkdirs();
         int cnt = 0;
         do {
             try {
-                File file = new File(fileName);
                 if (file.exists()) {
                     return true;
                 }
                 cnt++;
                 FileUtils.copyURLToFile(new URL(urlStr), new File(fileName), CONNECT_TIMEOUT, SOCKET_TIMEOUT);
                 File downloadFile = new File(fileName);
-                if (fileName.endsWith("html") && downloadFile.length() < 512) {
+                if (downloadFile.length() < 512) {
                     downloadFile.delete();
                     continue;
                 }
-                if (file.length() == 0) {
-                    file.delete();
-                    continue;
-                }
-                System.out.println(urlStr+"下载成功");
+                System.out.println(urlStr + "下载成功");
                 map.remove(urlStr);
                 return true;
             } catch (IOException e) {
-                new File(fileName).delete();
+                file.delete();
                 if (e instanceof FileNotFoundException) {
                     status.put(urlStr, true);
                     return false;

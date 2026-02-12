@@ -50,3 +50,7 @@ pagehelper:
   autoDialect: true
   closeConn: true
   reasonable: true
+
+filepath:
+  imgdir: D:\document\static\images\
+  tempdownload: C:\Users\admin\AppData\Local\Temp\

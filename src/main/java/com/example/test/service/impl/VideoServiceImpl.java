@@ -42,6 +42,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoModel> imple
     @Override
     @Transactional(rollbackFor = {Throwable.class}, propagation = Propagation.REQUIRES_NEW)
     public boolean save(VideoModel model) {
+        String[] tags = model.getTags();
+        List<String> newList = new ArrayList<>(tags.length);
+        for (String tag : tags) {
+            if ("1080p".equals(tag) || "60fps".equals(tag) || tag.endsWith("代") || tag.toLowerCase().contains("vip") || "720p".equals(tag)){
+                continue;
+            }
+            newList.add(tag);
+        }
+        model.setTags(newList.toArray(String[]::new));
         baseMapper.insert(model);
         return true;
     }

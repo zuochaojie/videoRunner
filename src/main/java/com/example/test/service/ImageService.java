@@ -16,5 +16,7 @@ public interface ImageService extends IService<ImageModel> {
      Map<String,Object> queryPage(Map<String,Object> params);
 
      void downloadImg();
+
+     String getImageTaskProcess();
 }
 
