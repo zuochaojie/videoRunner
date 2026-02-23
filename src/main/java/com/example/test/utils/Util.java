@@ -1,10 +1,12 @@
 package com.example.test.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -130,7 +132,7 @@ public class Util {
         return isNotFount;
     }
 
-    private static CloseableHttpClient createHttpClient() {
+    public static CloseableHttpClient createHttpClient() {
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(5000)
                 .setSocketTimeout(20000)
@@ -193,6 +195,29 @@ public class Util {
             }
         } catch (IOException e) {
 
+        }
+    }
+
+    public static void httpClientSaveUrl(String url, String referer, String cookies, String filePath) {
+        if (new File(filePath).exists()) {
+            return;
+        }
+        HttpGet httpGet = new HttpGet(url);
+        String agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
+        httpGet.setHeader("Connection", "keep-alive");
+        httpGet.setHeader("User-Agent", agent);
+        httpGet.setHeader("Cookie", cookies);
+        httpGet.setHeader("referer", referer);
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+             CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath));
+        ) {
+            HttpEntity httpEntity = httpResponse.getEntity();
+            String content = EntityUtils.toString(httpEntity);
+            bufferedWriter.write(content);
+        } catch (IOException e) {
+            new File(filePath).delete();
+            System.out.println(e.getMessage());
         }
     }
 }

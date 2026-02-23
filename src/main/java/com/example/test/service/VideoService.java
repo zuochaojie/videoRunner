@@ -14,5 +14,7 @@ import java.util.Collection;
  */
 public interface VideoService extends IService<VideoModel> {
      Map<String,Object> queryPage(Map<String,Object> params);
+
+    void updateAddress(Map<String,String> params);
 }
 

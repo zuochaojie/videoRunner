@@ -39,6 +39,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service("companyService")
 public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel> implements CompanyService {
@@ -58,7 +59,7 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
     public String IMG_DIR;
     @Value("${filepath.tempdownload}")
     public String TEMP_DOWNLOAD_DIR;
-    public static ThreadPoolExecutor executor = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+    public static ThreadPoolExecutor executor = new ThreadPoolExecutor(5, 5, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
     @Override
     @Transactional(rollbackFor = {Throwable.class})
@@ -167,24 +168,6 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                 completeCount.getAndIncrement();
             }
         });
-//        updateAddress();
-    }
-
-    private void updateAddress() {
-        String jsonFile = "D:\\下载\\renren.json";
-        try {
-            Map<String, List<String>> map = objectMapper.readValue(new File(jsonFile), Map.class);
-            VideoModel model = new VideoModel();
-            Set<String> strings = map.keySet();
-            for (String string : strings) {
-                String[] array = map.get(string).stream().toArray(String[]::new);
-                model.setId(string);
-                model.setAddress(array);
-                videoService.updateById(model);
-            }
-        } catch (IOException e) {
-
-        }
     }
 
     @Override
@@ -578,6 +561,9 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                 videoModel.setTags(tags);
                 videoModel.setReleaseName(releaseName);
                 videoModel.setId(UuidCreator.getTimeOrdered().toString());
+                if (model != null) {
+                    continue;
+                }
                 String temptation = TEMP_DOWNLOAD_DIR + companyModel.getCode() + "-" + movieID + ".json";
                 String imageJson = companyModel.getUrl() + "dyn/dla/json/movie_gallery/" + movieID + ".json";
                 boolean b = Util.saveUrl2File(imageJson, temptation);
@@ -592,9 +578,6 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                         String url = companyModel.getUrl() + s;
                         saveDownload(url, filePath);
                     }
-                }
-                if (model != null) {
-                    continue;
                 }
                 videoService.save(videoModel);
 

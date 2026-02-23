@@ -1,41 +1,27 @@
 package com.example.test.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.test.model.CompanyModel;
-import com.example.test.model.VideoModel;
+import com.example.test.mapper.ImageMapper;
+import com.example.test.model.ImageModel;
+import com.example.test.service.ImageService;
 import com.example.test.service.VideoService;
 import com.example.test.utils.Util;
-import com.example.test.utils.XLDownloadAPI;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.example.test.mapper.ImageMapper;
-import com.example.test.model.ImageModel;
-import com.example.test.service.ImageService;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service("imageService")
 public class ImageServiceImpl extends ServiceImpl<ImageMapper, ImageModel> implements ImageService {

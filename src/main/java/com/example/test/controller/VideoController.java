@@ -75,4 +75,10 @@ public class VideoController {
         videoService.removeByIds(List.of(ids));
         return R.ok();
     }
+
+    @PostMapping("/updateaddress")
+    public R updateAddress(@RequestBody  Map<String, String> params){
+        videoService.updateAddress(params);
+        return R.ok();
+    }
 }
