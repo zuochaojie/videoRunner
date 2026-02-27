@@ -35,15 +35,23 @@ public class RocketMQConsumer implements RocketMQListener<MessageData> {
             Map<String, List<String>> map = mapper.readValue(content, Map.class);
             map.forEach((k, v) -> {
                 VideoModel model = videoService.getById(k);
+                for (int i = 0; i < v.size(); i++) {
+                    String string=v.get(i);
+                    if (string.length() < 5) {
+                        model.setDuration(Integer.parseInt(string));
+                        v.remove(i);
+                        break;
+                    }
+                }
                 if (model.getAddress() == null || model.getAddress().length==0) {
-                    model.setAddress(v.toArray(new String[0]));
+                    model.setAddress(v.stream().distinct().toArray(String[]::new));
                 }else {
                     List<String> addressList = new ArrayList<>();
                     for (String address : model.getAddress()) {
-                        addressList.add(address);
+                        addressList.add(address.trim());
                     }
                     for (String string : v) {
-                        addressList.add(string);
+                        addressList.add(string.trim());
                     }
                     model.setAddress(addressList.stream().distinct().toArray(String[]::new));
                 }

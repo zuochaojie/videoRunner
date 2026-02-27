@@ -3,10 +3,12 @@ package com.example.test.page;
 import com.example.test.model.VideoModel;
 import com.example.test.utils.ChromeDriverUtil;
 import com.example.test.utils.Util;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 public class RenRenHtmlPage extends HtmlPage implements AutoCloseable {
 
     public static Map<String, String> map = new ConcurrentHashMap<>();
+    private  Map<String, Integer> timeMap = new ConcurrentHashMap<>();
 
     private String baseUrl;
 
@@ -28,12 +31,11 @@ public class RenRenHtmlPage extends HtmlPage implements AutoCloseable {
         String href = getElementsBycss(".link").get(1).getAttribute("href");
         baseUrl = href;
         webDriver.navigate().to(href + "thread.php?fid=4");
-        waitSleep(2);
+        waitElementBycss(10,".primary");
         click(By.cssSelector(".primary"));
         webDriver.navigate().to(href + "thread.php?fid=4");
         waitSleep(2);
     }
-
     public Map<String, List<String>> search(List<VideoModel> videoModelList, String start) {
         String text = getElementsBycss(".pagesone span").get(0).getText();
         String substring = text.substring(text.indexOf("/") + 1);
@@ -83,6 +85,10 @@ public class RenRenHtmlPage extends HtmlPage implements AutoCloseable {
                     }
                     String movieUUid = videoModelList.stream().filter(e -> e.getTitle().equals(movieTitle)).map(e -> e.getId()).toArray(String[]::new)[0];
                     List<String> orDefault = map.getOrDefault(movieUUid, new ArrayList<>());
+                    if (movieTitle.contains("HEYZO")){
+                        int duration = detail.getDuration();
+                        orDefault.add(Integer.toString(duration));
+                    }
                     orDefault.add(magnetText);
                     map.put(movieUUid, orDefault);
                 }
@@ -95,6 +101,10 @@ public class RenRenHtmlPage extends HtmlPage implements AutoCloseable {
             e.printStackTrace();
         }
         return map;
+    }
+
+    public Map<String, Integer> getTimeMap() {
+        return timeMap;
     }
 
     public void back() {

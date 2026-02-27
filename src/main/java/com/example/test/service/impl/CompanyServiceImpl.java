@@ -34,6 +34,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -191,143 +193,6 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
         CompanyModel companyModel = getById("10musume");
         this.getJsonMovie(companyModel);
     }
-
-    private void avsoxHeyzoTask() {
-        String str = "http://avsox.click/ja/studio/74a9d0e356f0b5b8";
-        String tempHtml = TEMP_DOWNLOAD_DIR + "heyzo_avsox.html";
-        boolean success = Util.saveUrl2File(str, tempHtml, 10000);
-        if (!success) {
-            return;
-        }
-        File file = new File(tempHtml);
-        try {
-            Document parse = Jsoup.parse(file);
-            file.delete();
-            Elements elements = parse.select(".photo-info");
-            for (Element element : elements) {
-                Elements dates = element.select("date");
-                String title = dates.get(0).text().trim();
-                VideoModel videoModel = new VideoModel();
-                videoModel.setTitle(title);
-                videoModel.setProducedBy("HEYZO");
-                VideoModel model = videoService.getBaseMapper().selectOne(Wrappers.query(videoModel));
-                if (model != null) {
-                    return;
-                }
-                String dateStr = dates.get(1).text().trim();
-                try {
-                    videoModel.setReleaseDate(Date.valueOf(dateStr));
-                } catch (Exception e) {
-
-                }
-                String href = element.parent().attr("href");
-                String movieInfo = "https:" + href;
-                String movieHtml = TEMP_DOWNLOAD_DIR + "heyzo-" + title + ".html";
-                Util.saveUrl2File(movieInfo, movieHtml, 10000);
-                File file1 = new File(movieHtml);
-                Document document = Jsoup.parse(file1);
-                file1.delete();
-                String[] strings = document.select(".genre").stream().map(Element::text).toArray(String[]::new);
-                String actress = document.select(".avatar-box").get(0).text();
-                videoModel.setTags(strings);
-                videoModel.setActress(actress);
-                videoModel.setId(UuidCreator.getTimeOrdered().toString());
-                String releaseName = document.select("h3").get(0).text();
-                if (releaseName.contains("】")) {
-                    releaseName = releaseName.substring(releaseName.indexOf("】") + 1).trim();
-                }
-                releaseName = releaseName.replace(title, "").replace("～ - 無修正アダルト動画 HEYZO", "").replace("- 無修正アダルト動画 HEYZO", "").trim();
-                videoModel.setReleaseName(releaseName);
-                videoService.save(videoModel);
-                List<String> heyzoImgUrl = getHeyzoImgUrl(title);
-                ImageModel imageModel = new ImageModel();
-                imageModel.setId(document.select(".bigImage").get(0).attr("href"));
-                imageModel.setFilePath(IMG_DIR + "HEYZO\\" + videoModel.getTitle() + "\\" + videoModel.getTitle() + ".jpg");
-                if (imageService.getById(imageModel.getId()) == null) {
-                    imageService.save(imageModel);
-                }
-                Queue<String> fileNameList = getFileNameList();
-                for (String s : heyzoImgUrl) {
-                    imageModel.setId(s);
-                    imageModel.setFilePath(IMG_DIR + "HEYZO\\" + videoModel.getTitle() + "\\" + fileNameList.poll());
-                    if (imageService.getById(imageModel.getId()) == null) {
-                        imageService.save(imageModel);
-                    }
-                }
-            }
-        } catch (IOException e) {
-
-        }
-    }
-
-    private void avsox1PondoTask() {
-        String str = "http://avsox.click/ja/studio/6aa5c06bb3d805f2";
-        String tempHtml = TEMP_DOWNLOAD_DIR + "pondo_avsox.html";
-        boolean success = Util.saveUrl2File(str, tempHtml, 10000);
-        if (!success) {
-            return;
-        }
-        try {
-            File file = new File(tempHtml);
-            Document parse = Jsoup.parse(file);
-            file.delete();
-            Elements elements = parse.select(".photo-info");
-            for (Element element : elements) {
-                Elements dates = element.select("date");
-                String title = dates.get(0).text().trim();
-                VideoModel videoModel = new VideoModel();
-                videoModel.setTitle(title);
-                videoModel.setProducedBy("1pondo");
-                VideoModel model = videoService.getBaseMapper().selectOne(Wrappers.query(videoModel));
-                if (model != null) {
-                    return;
-                }
-                String dateStr = dates.get(1).text().trim();
-                try {
-                    videoModel.setReleaseDate(Date.valueOf(dateStr));
-                } catch (Exception e) {
-                    System.out.println(dateStr);
-                }
-                String href = element.parent().attr("href");
-                String movieInfo = "https:" + href;
-                String movieHtml = TEMP_DOWNLOAD_DIR + "1pondo-" + title + ".html";
-                Util.saveUrl2File(movieInfo, movieHtml, 10000);
-                File file1 = new File(movieHtml);
-                Document document = Jsoup.parse(file1);
-                file1.delete();
-                String releaseName = document.select("h3").get(0).text().replace(title, "").trim();
-                String[] strings = document.select(".genre").stream().map(Element::text).toArray(String[]::new);
-                String actress = document.select(".avatar-box").get(0).text();
-                videoModel.setTags(strings);
-                videoModel.setReleaseName(releaseName);
-                videoModel.setActress(actress);
-                videoModel.setId(UuidCreator.getTimeOrdered().toString());
-                videoService.save(videoModel);
-                String tempJson = TEMP_DOWNLOAD_DIR + "1pondo" + title + ".json";
-                boolean b = Util.saveUrl2File("https://www.1pondo.tv/dyn/dla/json/movie_gallery/" + title + ".json", tempJson, 10000);
-                if (b) {
-                    List<String> images = getMovieImgUrlsFromJson(tempJson);
-                    ImageModel imageModel = new ImageModel();
-                    imageModel.setId(document.select(".bigImage").get(0).attr("href"));
-                    imageModel.setFilePath(IMG_DIR + "1pondo\\" + videoModel.getTitle() + "\\" + videoModel.getTitle() + ".jpg");
-                    if (imageService.getById(imageModel.getId()) == null) {
-                        imageService.save(imageModel);
-                    }
-                    Queue<String> fileNameList = getFileNameList();
-                    for (String s : images) {
-                        imageModel.setId("https://www.1pondo.tv/" + s);
-                        imageModel.setFilePath(IMG_DIR + "1pondo\\" + videoModel.getTitle() + "\\" + fileNameList.poll());
-                        if (imageService.getById(imageModel.getId()) == null) {
-                            imageService.save(imageModel);
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     private void heyzoTask() {
         CompanyModel companyModel = getById("HEYZO");
         String tempFile = TEMP_DOWNLOAD_DIR + companyModel.getCode() + ".html";
@@ -491,6 +356,17 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                     videoModel.setReleaseDate(Date.valueOf(text));
                 } catch (Exception e) {
                 }
+                for (Element element : select) {
+                    Elements children = element.children();
+                    for (Element child : children) {
+                        if ("duration".equals(child.attr("itemprop"))) {
+                            text = child.text().trim();
+                            int index = convertToSeconds(text);
+                            videoModel.setDuration(index);
+                            break;
+                        }
+                    }
+                }
                 videoModel.setReleaseName(releaseName);
                 videoModel.setId(UuidCreator.getTimeOrdered().toString());
                 String[] strings = parse.select(".spec-item").stream().map(Element::text).toArray(String[]::new);
@@ -501,6 +377,12 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private int convertToSeconds(String timeStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTime time = LocalTime.parse(timeStr, formatter);
+        return time.toSecondOfDay();
     }
 
     private List<String> getHeyzoImgUrl(String movieId) {
@@ -549,6 +431,7 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                 VideoModel model = videoService.getBaseMapper().selectOne(query);
                 String actor = row.get("Actor").toString();
                 String release = row.get("Release").toString();
+                Integer duration = Integer.parseInt(row.get("Duration").toString());
                 String releaseName = row.get("Title").toString();
                 List<String> list = (List<String>) row.get("UCNAME");
                 String[] tags = new String[list.size()];
@@ -559,6 +442,7 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                 videoModel.setReleaseDate(Date.valueOf(release));
                 videoModel.setActress(actor);
                 videoModel.setTags(tags);
+                videoModel.setDuration(duration);
                 videoModel.setReleaseName(releaseName);
                 videoModel.setId(UuidCreator.getTimeOrdered().toString());
                 if (model != null) {

@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,6 +97,10 @@ public class JsoupPage {
                 while (matcher.find()) {
                     string = matcher.group();
                 }
+                if (set.contains(string)) {
+                    return "";
+                }
+                set.add(string);
                 return string;
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -110,6 +116,20 @@ public class JsoupPage {
         return substring;
     }
 
+    public int getDuration() {
+        String text = doc.select(".tpc_content").get(0).text();
+        char[] charArray = text.toCharArray();
+        for (int index = 0; index < charArray.length; index++) {
+            if (charArray[index] == ':' && charArray[index + 3] == ':') {
+                StringBuilder builder = new StringBuilder();
+                for (int i = index - 2; i <= index + 5; i++) {
+                    builder.append(charArray[i]);
+                }
+                return convertToSeconds(builder.toString());
+            }
+        }
+        return 0;
+    }
 
     public List<String> getAllPageUrl(Collection<String> collection, String start) {
         List<String> list = new ArrayList<>();
@@ -118,6 +138,10 @@ public class JsoupPage {
         for (int i = 6; i < trList.size() - 2; i++) {
             Element element = trList.get(i).select("a").get(1);
             String text = element.text();
+            if (text.contains("heyzo")) {
+                text.replace("heyzo", "HEYZO");
+            }
+            text = text.replace("HEYZO ", "HEYZO-");
             String date = trList.get(i).child(4).select("span").text();
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             try {
@@ -134,17 +158,24 @@ public class JsoupPage {
                 continue;
             }
             for (String s : collection) {
-                String string = s;
-                if (s.contains("HEYZO")) {
-                    string = s.replace("-", " ");
-                }
-                if (text.contains(s) || text.contains(string)) {
+                if (text.contains(s)) {
                     list.add(s + "_" + element.select("a").get(0).attr("href"));
                     break;
                 }
             }
         }
         return list;
+    }
+
+    private static int convertToSeconds(String timeStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            LocalTime time = LocalTime.parse(timeStr, formatter);
+            return time.toSecondOfDay();
+        } catch (Exception e) {
+            System.out.println(timeStr);
+        }
+        return 0;
     }
 
     public List<String> getActressImage() {

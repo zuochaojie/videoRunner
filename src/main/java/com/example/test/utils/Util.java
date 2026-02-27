@@ -110,12 +110,14 @@ public class Util {
                 map.remove(urlStr);
                 return true;
             } catch (IOException e) {
-                file.delete();
                 if (e instanceof FileNotFoundException) {
                     status.put(urlStr, true);
                     return false;
                 }
                 String message = e.getMessage();
+                if (!"Connect timed out".equals(message)) {
+                    file.delete();
+                }
                 if (!message.equals(map.get(urlStr))) {
                     map.put(urlStr, message);
                 }
