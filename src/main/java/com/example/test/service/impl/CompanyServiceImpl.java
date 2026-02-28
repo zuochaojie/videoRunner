@@ -31,8 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -281,11 +284,43 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, CompanyModel>
                     }
                 }
                 videoModel.setTags(tags);
+                int duration = getHeyzoMovieDuration(videoModel);
+                videoModel.setDuration(duration);
                 videoService.save(videoModel);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private int getHeyzoMovieDuration(VideoModel videoModel) throws UnsupportedEncodingException {
+        String url = "https://www.d2pass.com/search?k=" + URLEncoder.encode(videoModel.getActress(), "UTF-8");
+        String tempHtml = TEMP_DOWNLOAD_DIR + "d2pass.html";
+        boolean success = Util.saveUrl2File(url, tempHtml);
+        if (!success) {
+            return 0;
+        }
+        try {
+            File file = new File(tempHtml);
+            Elements select = Jsoup.parse(file).select("#search-layout").get(0).select("a");
+            file.delete();
+            for (Element element : select) {
+                if (element.text().equals(videoModel.getReleaseName())) {
+                    url = "https://www.d2pass.com/" + element.attr("href");
+                    tempHtml = TEMP_DOWNLOAD_DIR + "d2passmovie.html";
+                    File d2passmovie = new File(tempHtml);
+                    success = Util.saveUrl2File(url, tempHtml);
+                    if (success) {
+                        String text = Jsoup.parse(d2passmovie).select("h1").parents().get(0).child(3).child(1).select("span").get(0).text();
+                        d2passmovie.delete();
+                        return convertToSeconds(text);
+                    }
+                }
+            }
+        } catch (IOException e) {
+
+        }
+        return 0;
     }
 
     private void caribeanTask() {
